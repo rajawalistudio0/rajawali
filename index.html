@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Formulir</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    input, textarea, button { display: block; margin: 10px 0; width: 100%; padding: 10px; }
+    .data-box { background: #eee; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h2>Formulir Online</h2>
+  <form id="formulir">
+    <input type="text" id="nama" placeholder="Nama" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <textarea id="pesan" placeholder="Pesan" required></textarea>
+    <button type="submit">Kirim</button>
+  </form>
+
+  <h3>Admin Panel</h3>
+  <button id="lihatBtn">Lihat Semua Jawaban</button>
+  <div id="hasil"></div>
+
+  <script type="module">
+    // Import dari Firebase CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    // 🔧 Config kamu (rajawali-form)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDshbbL5YehR9HOhmff5grWQ-l2CIiL6xc",
+      authDomain: "rajawali-form.firebaseapp.com",
+      projectId: "rajawali-form",
+      storageBucket: "rajawali-form.firebasestorage.app",
+      messagingSenderId: "851146706447",
+      appId: "1:851146706447:web:dcc30197b2e4e765389d7a",
+      measurementId: "G-673BSCWFDW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Fungsi kirim data
+    const form = document.getElementById("formulir");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nama = document.getElementById("nama").value;
+      const email = document.getElementById("email").value;
+      const pesan = document.getElementById("pesan").value;
+      const id = Date.now().toString();
+
+      await set(ref(db, 'jawaban/' + id), { nama, email, pesan });
+      alert("Data berhasil dikirim!");
+      form.reset();
+    });
+
+    // Fungsi lihat data
+    document.getElementById("lihatBtn").addEventListener("click", async () => {
+      const hasil = document.getElementById("hasil");
+      const snapshot = await get(child(ref(db), 'jawaban'));
+      hasil.innerHTML = "";
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        Object.entries(data).forEach(([id, d]) => {
+          hasil.innerHTML += `
+            <div class="data-box">
+              <strong>Nama:</strong> ${d.nama}<br>
+              <strong>Email:</strong> ${d.email}<br>
+              <strong>Pesan:</strong> ${d.pesan}
+            </div>
+          `;
+        });
+      } else {
+        hasil.innerHTML = "Belum ada data.";
+      }
+    });
+  </script>
+</body>
+</html>
