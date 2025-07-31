@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Brain Scanner</title>
+  <style>
+    body {
+      background: blue;
+      color: #00ff00;
+      font-family: 'Times New Roman', monospace;
+      text-align: center;
+      padding-top: 100px;
+    }
+    button {
+      background-color: #86ff2b;
+      color: #000;
+      border: none;
+      padding: 15px 30px;
+      font-size: 20px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #scanBtn {
+      background-color: #86ff2b;
+      color: #000;
+      border: none;
+      padding: 15px 30px;
+      font-size: 20px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #output {
+      margin-top: 50px;
+      font-size: 24px;
+      animation: blink 100s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Brain Scanner</h1>
+  <p>Click the button below to scan your brain...</p>
+  <button id="scanBtn">Scan</button>
+  <div id="output"></div>
+  <button id="scanBtn">Reload</button>
+  <p>radiation size:</p>
+  <select>
+    <option>
+      1-2 mSv
+    </option>
+    <option>
+      6-7 mSv
+    </option>
+    <option>
+      8-14 mSv
+    </option>
+    <option>
+      6-10 mSv
+    </option>
+    <option>
+      12-18 mSv
+    </option>
+    <option>
+      10-25/+ mSv
+    </option>
+  </select>
+  <p> hasil:</p>
+  <video>https://youtu.be/XgpRBmfU9gY?si=ulnq5QAwfL04qKfu</video>
+    <button onclick="window.location.href='https://id.pngtree.com/freepng/3d-skull-illustration_13360585.html';">Hasil</button>
+
+  <script>
+    const scanBtn = document.getElementById('scanBtn');
+    const output = document.getElementById('output');
+
+    const sb = [
+     "Lagi mikirin cewek...",
+      "Lagi mikirin Sisil...",
+      "Mikirin mantan",
+      "Otak sedang libur...",
+      "sedang rindu seseorang...",
+      "Sdm Rendah",
+      "Mikirin cara jadi kaya tanpa kerja",
+      "Tidak ada aktivitas otak terdeteksi...",
+      "Terobsesi dengan cewek!",
+      "Lagi mikirin cewek",
+      "Berpikir tentang teori tikus kantor",
+      "Memproses... Gagal!"
+    ];
+
+    scanBtn.onclick = () => {
+      output.textContent = "Scanning Brain...";
+      output.style.animation = "blink 100s infinite";
+      
+      setTimeout(() => {
+        const random = sb[Math.floor(Math.random() * sb.length)];
+        output.textContent = random;
+        output.style.animation = "none";
+      }, 3000);
+    };
+  </script>
+
+</body>
+</html>
