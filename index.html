@@ -1,80 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Formulir</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input, textarea, button { display: block; margin: 10px 0; width: 100%; padding: 10px; }
-    .data-box { background: #eee; padding: 10px; margin: 10px 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(270deg,#6f00ff,#c800ff,#6c63ff,#3498db);background-size:800% 800%;animation:gradientBG 25s ease infinite;color:#fff;min-height:100vh;}
+@keyframes gradientBG{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.container{max-width:900px;margin:50px auto;padding:20px;background:rgba(0,0,0,0.8);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,0.7);}
+h2{text-align:center;font-size:28px;text-shadow:0 0 15px #6c63ff,0 0 25px #ff00ff;margin-bottom:20px;}
+input{width:100%;padding:14px;border-radius:12px;border:2px solid #6c63ff;background: rgba(0,0,0,0.3);color:#fff;font-size:16px;margin-bottom:20px;}
+input:focus{border-color:#ff00ff;outline:none;box-shadow:0 0 30px #ff00ff,0 0 50px #6c63ff inset;}
+button{padding:10px 20px;border:none;border-radius:15px;background: linear-gradient(90deg,#6c63ff,#ff00ff,#6c63ff);color:#fff;font-size:16px;cursor:pointer;margin-bottom:20px;}
+button:hover{box-shadow:0 0 30px #ff00ff,0 0 60px #6c63ff inset;}
+table{width:100%;border-collapse:collapse;margin-top:20px;}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #fff;}
+th{text-shadow:0 0 5px #fff;}
+</style>
 </head>
 <body>
-  <h2>Formulir Online</h2>
-  <form id="formulir">
-    <input type="text" id="nama" placeholder="Nama" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <textarea id="pesan" placeholder="Pesan" required></textarea>
-    <button type="submit">Kirim</button>
-  </form>
+<div class="container" id="loginContainer">
+  <h2>Admin Login</h2>
+  <input type="password" id="adminPassword" placeholder="Masukkan Password Admin">
+  <button id="loginBtn">Login</button>
+</div>
 
-  <h3>Admin Panel</h3>
-  <button id="lihatBtn">Lihat Semua Jawaban</button>
-  <div id="hasil"></div>
+<div class="container" id="panelContainer" style="display:none;">
+  <h2>Admin Panel</h2>
+  <button id="logoutBtn">Logout</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Phone</th>
+        <th>Lokasi</th>
+        <th>Email</th>
+        <th>Waktu</th>
+      </tr>
+    </thead>
+    <tbody id="dataTable"></tbody>
+  </table>
+</div>
 
-  <script type="module">
-    // Import dari Firebase CDN
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-    // 🔧 Config kamu (rajawali-form)
-    const firebaseConfig = {
-      apiKey: "AIzaSyDshbbL5YehR9HOhmff5grWQ-l2CIiL6xc",
-      authDomain: "rajawali-form.firebaseapp.com",
-      projectId: "rajawali-form",
-      storageBucket: "rajawali-form.firebasestorage.app",
-      messagingSenderId: "851146706447",
-      appId: "1:851146706447:web:dcc30197b2e4e765389d7a",
-      measurementId: "G-673BSCWFDW"
-    };
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAyCvKdrd0_EdqTg3EZgkbmeQQvAhn172Y",
+  authDomain: "absenneoform.firebaseapp.com",
+  databaseURL: "https://absenneoform-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "absenneoform",
+  storageBucket: "absenneoform.appspot.com",
+  messagingSenderId: "802007314176",
+  appId: "1:802007314176:web:5cea26b50761a0dccc0de5"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    // Fungsi kirim data
-    const form = document.getElementById("formulir");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nama = document.getElementById("nama").value;
-      const email = document.getElementById("email").value;
-      const pesan = document.getElementById("pesan").value;
-      const id = Date.now().toString();
+const loginContainer = document.getElementById("loginContainer");
+const panelContainer = document.getElementById("panelContainer");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const passwordInput = document.getElementById("adminPassword");
+const dataTable = document.getElementById("dataTable");
 
-      await set(ref(db, 'jawaban/' + id), { nama, email, pesan });
-      alert("Data berhasil dikirim!");
-      form.reset();
+const ADMIN_PASSWORD = "admin123"; // ganti sesuai password kamu
+
+if(localStorage.getItem("adminLoggedIn") === "true"){
+  loginContainer.style.display = "none";
+  panelContainer.style.display = "block";
+  loadData();
+}
+
+loginBtn.addEventListener("click",()=>{
+  if(passwordInput.value === ADMIN_PASSWORD){
+    localStorage.setItem("adminLoggedIn","true");
+    loginContainer.style.display = "none";
+    panelContainer.style.display = "block";
+    loadData();
+  }else{
+    alert("Password salah!");
+  }
+});
+
+logoutBtn.addEventListener("click",()=>{
+  localStorage.removeItem("adminLoggedIn");
+  panelContainer.style.display = "none";
+  loginContainer.style.display = "block";
+  passwordInput.value = "";
+});
+
+function loadData(){
+  const dataRef = ref(db,"FormData");
+  onValue(dataRef,(snapshot)=>{
+    dataTable.innerHTML="";
+    snapshot.forEach(childSnap=>{
+      const data = childSnap.val();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data.Nama || ""}</td>
+        <td>${data.Pesan || ""}</td>
+        <td>${data.Lokasi || ""}</td>
+        <td>${data.Inti || ""}</td>
+        <td>${data.timestamp ? new Date(data.timestamp).toLocaleString() : ""}</td>
+      `;
+      dataTable.appendChild(row);
     });
-
-    // Fungsi lihat data
-    document.getElementById("lihatBtn").addEventListener("click", async () => {
-      const hasil = document.getElementById("hasil");
-      const snapshot = await get(child(ref(db), 'jawaban'));
-      hasil.innerHTML = "";
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        Object.entries(data).forEach(([id, d]) => {
-          hasil.innerHTML += `
-            <div class="data-box">
-              <strong>Nama:</strong> ${d.nama}<br>
-              <strong>Email:</strong> ${d.email}<br>
-              <strong>Pesan:</strong> ${d.pesan}
-            </div>
-          `;
-        });
-      } else {
-        hasil.innerHTML = "Belum ada data.";
-      }
-    });
-  </script>
+  });
+}
+</script>
 </body>
 </html>
